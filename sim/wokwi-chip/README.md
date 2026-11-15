@@ -3,6 +3,8 @@
 Wraps the [`cst820-sim`](../../cst820-sim) behavioral model into a
 [Wokwi custom chip](https://docs.wokwi.com/chips-api/getting-started).
 
+**[Live demo on wokwi.com](https://wokwi.com/projects/480766558097043457)**
+
 ```sh
 ./build.sh   # produces cst820.chip.wasm next to cst820.chip.json
 ```
