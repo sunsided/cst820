@@ -156,6 +156,8 @@ jobs:
       - name: Collect coverage
         run: cargo llvm-cov --workspace --all-features --lcov --output-path lcov.info
       - name: Upload to Codecov
+        # Fork and Dependabot pull requests get no OIDC token, so the upload cannot work.
+        if: github.event.pull_request.head.repo.fork != true && github.actor != 'dependabot[bot]'
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           files: lcov.info
