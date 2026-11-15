@@ -1,0 +1,153 @@
+# Tasks for the cst820 workspace: `task` lists them.
+# https://taskfile.dev
+version: '3'
+
+vars:
+  CHIP_DIR: sim/wokwi-chip
+  FIRMWARE_DIR: examples/esp32c3
+
+tasks:
+  default:
+    cmds:
+      - task --list --sort=none
+    silent: true
+
+  build:
+    desc: Build the workspace with all features
+    preconditions: &cargo
+      - sh: command -v cargo
+        msg: "cargo not found — install Rust from https://rustup.rs/"
+    cmds:
+      - cargo build --workspace --all-features {{.CLI_ARGS}}
+
+  test:
+    desc: Run the tests with default, all and no default features (as CI does)
+    preconditions: *cargo
+    cmds:
+      - cargo test --workspace {{.CLI_ARGS}}
+      - cargo test --workspace --all-features {{.CLI_ARGS}}
+      - cargo test --workspace --no-default-features {{.CLI_ARGS}}
+
+  fmt:
+    desc: Format the workspace, the Wokwi chip and the firmware
+    aliases: [format]
+    preconditions: *cargo
+    cmds:
+      - cargo fmt --all
+      - cd {{.CHIP_DIR}} && cargo fmt
+      - cd {{.FIRMWARE_DIR}} && cargo fmt
+
+  lint:
+    desc: Run clippy on the workspace
+    preconditions: *cargo
+    cmds:
+      - cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+  lint:fix:
+    desc: Apply clippy fixes, then format
+    aliases: [fix]
+    preconditions: *cargo
+    cmds:
+      - cargo clippy --workspace --all-targets --all-features --fix --allow-dirty --allow-staged
+      - task: fmt
+
+  lint:workflows:
+    desc: Lint the GitHub workflows with actionlint and zizmor
+    preconditions:
+      - sh: command -v actionlint
+        msg: "actionlint not found — see https://github.com/rhysd/actionlint"
+      - sh: command -v zizmor
+        msg: "zizmor not found — pipx install zizmor"
+    cmds:
+      - actionlint
+      - zizmor --offline --persona=auditor .github
+
+  check:
+    desc: Check formatting, clippy and docs without changing files
+    preconditions: *cargo
+    cmds:
+      - cargo fmt --all --check
+      - task: lint
+      - task: docs
+
+  ci:
+    desc: Run the main CI checks locally
+    cmds:
+      - task: check
+      - task: test
+
+  docs:
+    desc: Build the documentation
+    preconditions: *cargo
+    cmds:
+      - cargo doc --workspace --all-features --no-deps
+
+  docs:open:
+    desc: Build the documentation and open it
+    preconditions: *cargo
+    cmds:
+      - cargo doc --workspace --all-features --no-deps --open
+
+  coverage:
+    desc: Print a line coverage summary
+    preconditions:
+      - sh: command -v cargo-llvm-cov
+        msg: "cargo-llvm-cov not found — cargo install cargo-llvm-cov"
+    cmds:
+      - cargo llvm-cov --workspace --all-features --summary-only
+
+  chip:
+    desc: Build the Wokwi chip (cst820.chip.wasm)
+    preconditions:
+      - sh: rustup target list --installed | grep -q wasm32-unknown-unknown
+        msg: "wasm target missing — rustup target add wasm32-unknown-unknown"
+    sources:
+      - '{{.CHIP_DIR}}/src/**/*.rs'
+      - '{{.CHIP_DIR}}/Cargo.toml'
+      - cst820-sim/src/**/*.rs
+      - cst820-registers/src/**/*.rs
+    generates:
+      - '{{.CHIP_DIR}}/cst820.chip.wasm'
+    cmds:
+      - '{{.CHIP_DIR}}/build.sh'
+
+  firmware:
+    desc: Build the ESP32-C3 example firmware (both binaries)
+    preconditions:
+      - sh: rustup target list --installed | grep -q riscv32imc-unknown-none-elf
+        msg: "RISC-V target missing — rustup target add riscv32imc-unknown-none-elf"
+    cmds:
+      - cd {{.FIRMWARE_DIR}} && cargo build --release
+
+  sim:
+    desc: Run the Wokwi touch scenario against the chip and the firmware
+    deps: [chip, firmware]
+    preconditions:
+      - sh: command -v wokwi-cli
+        msg: "wokwi-cli not found — see https://docs.wokwi.com/wokwi-ci/cli-installation"
+      - sh: test -n "$WOKWI_CLI_TOKEN"
+        msg: "WOKWI_CLI_TOKEN not set — create one at https://wokwi.com/dashboard/ci"
+    cmds:
+      - cd {{.FIRMWARE_DIR}} && wokwi-cli . --scenario scenarios/touch.yaml --timeout 10000
+
+  release:dry:
+    desc: Preview a release without changing anything (LEVEL=patch|minor|major)
+    vars:
+      LEVEL: '{{ .LEVEL | default "patch" }}'
+    requires:
+      vars:
+        - name: LEVEL
+          enum: [patch, minor, major]
+    preconditions:
+      - sh: command -v cargo-release
+        msg: "cargo-release not found — cargo install cargo-release"
+    cmds:
+      - cargo release {{.LEVEL}} --workspace
+
+  clean:
+    desc: Remove build output of the workspace, the chip and the firmware
+    preconditions: *cargo
+    cmds:
+      - cargo clean
+      - cd {{.CHIP_DIR}} && cargo clean && rm -f cst820.chip.wasm
+      - cd {{.FIRMWARE_DIR}} && cargo clean
