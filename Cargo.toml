@@ -4,7 +4,7 @@ members = ["cst820-registers", "cst820", "cst820-sim"]
 exclude = ["sim/wokwi-chip", "examples"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Markus Mayer <widemeadows@gmail.com>"]
 license = "EUPL-1.2 OR MIT OR Apache-2.0"
 homepage = "https://github.com/sunsided/cst820"
@@ -20,7 +20,7 @@ embedded-hal-async = "1.0.0"
 embassy-futures = "0.1.2"
 fake-bus = "0.1.0"
 hardware-registers = { version = "0.4.1", default-features = false, features = ["i2c"] }
-cst820-registers = { version = "0.1.0", path = "cst820-registers" }
+cst820-registers = { version = "0.2.0", path = "cst820-registers" }
 cst820-sim = { path = "cst820-sim" }
 
 [workspace.lints.clippy]
