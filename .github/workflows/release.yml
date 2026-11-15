@@ -6,15 +6,52 @@ on:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
-permissions:
-  contents: write
+permissions: {}
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
-  release:
-    name: Create GitHub Release
+  publish:
+    name: Publish to crates.io
     runs-on: ubuntu-latest
+    # The crates.io trusted publisher is bound to this environment.
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check that the tag matches the crate version
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 \
+            | jq -r '.packages[] | select(.name == "cst820") | .version')
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match crate version $version"
+            exit 1
+          fi
+      - name: Authenticate with crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
+      - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        # Publishes in dependency order: cst820-registers first, then cst820.
+        run: cargo publish -p cst820-registers -p cst820
+
+  github-release:
+    name: Create GitHub Release
+    needs:
+      - publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Extract release notes
         run: |
           version="${GITHUB_REF_NAME#v}"
@@ -33,4 +70,4 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" --title "$VERSION" --notes-file release-notes.md --verify-tag
+        run: gh release create "$GITHUB_REF_NAME" --title "$VERSION" --notes-file release-notes.md --verify-tag --repo "$GITHUB_REPOSITORY"

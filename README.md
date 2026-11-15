@@ -27,8 +27,11 @@ cargo release <patch|minor|major>            # dry run
 cargo release <patch|minor|major> --execute
 ```
 
-This publishes `cst820-registers` and `cst820`, commits `Release X.Y.Z`, and pushes the tag
-`vX.Y.Z`. The tag creates a GitHub Release named `X.Y.Z` with the changelog sections as notes.
+This commits `Release X.Y.Z` and pushes the tag `vX.Y.Z`. The tag runs the release workflow,
+which publishes `cst820-registers` and `cst820` to crates.io via
+[trusted publishing](https://crates.io/docs/trusted-publishing) (no API token in the
+repository) and then creates a GitHub Release named `X.Y.Z` with the changelog sections
+as notes.
 
 ## Code of Conduct
 
