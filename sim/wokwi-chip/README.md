@@ -24,10 +24,10 @@ the `chip.zip` attached to each GitHub Release instead of building the chip. Add
 `chip-cst820` part and a dependency to `diagram.json`; no `[[chip]]` entry is needed:
 
 ```json
-"dependencies": { "chip-cst820": "github:sunsided/cst820@0.1.0" }
+"dependencies": { "chip-cst820": "github:sunsided/cst820@0.2.0" }
 ```
 
-The version is given without the `v` prefix of the release tag; `@v0.1.0` fails to load.
+The version is given without the `v` prefix of the release tag; `@v0.2.0` fails to load.
 
 | Pin   | Function                         |
 |-------|----------------------------------|

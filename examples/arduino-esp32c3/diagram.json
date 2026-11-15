@@ -69,6 +69,6 @@
     ]
   ],
   "dependencies": {
-    "chip-cst820": "github:sunsided/cst820@0.1.0"
+    "chip-cst820": "github:sunsided/cst820@0.2.0"
   }
 }
