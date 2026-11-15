@@ -20,6 +20,9 @@ The behavioral model in `cst820-sim` is used both as a fake I²C bus in host tes
 [Wokwi](https://wokwi.com) custom chip (`sim/wokwi-chip`). Example firmware in `examples/`
 runs against the emulated chip using `wokwi-cli`.
 
+**[Try it in the browser](https://wokwi.com/projects/480766558097043457)**: an ESP32-C3 talking to the emulated CST820 on
+wokwi.com. Click the chip to drive touches and gestures.
+
 ## Releasing
 
 Both crates share one version. From `main`, with the changes listed under
