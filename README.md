@@ -23,6 +23,12 @@ runs against the emulated chip using `wokwi-cli`.
 **[Try it in the browser](https://wokwi.com/projects/480766558097043457)**: an ESP32-C3 talking to the emulated CST820 on
 wokwi.com. Click the chip to drive touches and gestures.
 
+## Development
+
+The [Taskfile](Taskfile.dist.yaml) wraps the common commands: `task check` and
+`task test` run what CI runs, `task sim` builds the Wokwi chip and the ESP32-C3 firmware
+and runs the touch scenario. `task` lists everything.
+
 ## Releasing
 
 Both crates share one version. From `main`, with the changes listed under
