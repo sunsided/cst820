@@ -19,9 +19,9 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
-mod fake_i2c;
+mod bus;
 
-pub use fake_i2c::FakeI2c;
+pub use bus::FakeI2c;
 
 use cst820_registers::{
     CST820_CHIP_ID, DEFAULT_DEVICE_ADDRESS, Gesture, IrqCtl, MotionMask, RegisterAddress as Reg,
