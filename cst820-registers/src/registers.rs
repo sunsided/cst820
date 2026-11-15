@@ -98,6 +98,7 @@ macro_rules! value_register {
     ($(#[$meta:meta])* $type:ident, $addr:ident, $access:ident, $writable:ident) => {
         value_register!($(#[$meta])* $type, $addr, $access, $writable, 0);
     };
+
     ($(#[$meta:meta])* $type:ident, $addr:ident, $access:ident, $writable:ident, $default:expr) => {
         $(#[$meta])*
         #[bitfield(u8, order = Msb)]

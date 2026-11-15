@@ -100,6 +100,7 @@ mod tests {
         ] {
             assert_eq!(Gesture::from_bits(g.into_bits()), g);
         }
+
         assert_eq!(Gesture::from_bits(0x42), Gesture::Unknown);
     }
 
