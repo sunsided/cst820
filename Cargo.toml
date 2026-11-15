@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["cst820-registers", "cst820-sim"]
+members = ["cst820-registers", "cst820", "cst820-sim"]
 
 [workspace.package]
 version = "0.1.0"
