@@ -70,19 +70,23 @@ impl Chip {
         };
 
         let mut irq = false;
+
         if pressed {
             irq |= self.model.touch(x as u16, y as u16);
         } else if self.was_pressed {
             irq |= self.model.release();
         }
+
         self.was_pressed = pressed;
 
         if gesture != self.last_gesture && gesture != 0 {
             irq |= self.model.gesture(Gesture::from_bits(gesture as u8));
         }
+
         self.last_gesture = gesture;
 
         self.model.tick(SCAN_PERIOD_US / 1000);
+
         if irq {
             self.pulse_int();
         }
@@ -107,6 +111,7 @@ extern "C" fn on_reset_change(_: *mut c_void, _pin: PinId, value: u32) {
     with_chip(|chip| {
         // shortcut: the chip answers right after RST rises; the real one needs >= 100 ms (Tron).
         chip.in_reset = value == LOW;
+
         if !chip.in_reset {
             chip.model.reset();
             chip.was_pressed = false;
@@ -177,9 +182,11 @@ pub extern "C" fn chipInit() {
             was_pressed: false,
             last_gesture: 0,
         };
+
         CHIP.with(|c| *c.borrow_mut() = Some(chip));
 
         timerStart(scan_timer, SCAN_PERIOD_US, true);
     }
+
     debug("cst820: chip initialized");
 }

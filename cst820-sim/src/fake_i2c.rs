@@ -21,27 +21,33 @@ impl<'a> FakeI2c<'a> {
 
     fn run(&mut self, address: u8, operations: &mut [Operation<'_>]) -> Result<(), ErrorKind> {
         let mut model = self.model.borrow_mut();
+
         if address != model.address() {
             return Err(ErrorKind::NoAcknowledge(NoAcknowledgeSource::Address));
         }
+
         for operation in operations {
             match operation {
                 Operation::Write(bytes) => {
                     if !model.i2c_start(false) {
                         return Err(ErrorKind::NoAcknowledge(NoAcknowledgeSource::Address));
                     }
+
                     if !bytes.iter().all(|&b| model.i2c_write(b)) {
                         return Err(ErrorKind::NoAcknowledge(NoAcknowledgeSource::Data));
                     }
                 }
+
                 Operation::Read(buffer) => {
                     if !model.i2c_start(true) {
                         return Err(ErrorKind::NoAcknowledge(NoAcknowledgeSource::Address));
                     }
+
                     buffer.iter_mut().for_each(|b| *b = model.i2c_read());
                 }
             }
         }
+
         Ok(())
     }
 }

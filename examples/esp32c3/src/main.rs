@@ -38,9 +38,11 @@ fn main() -> ! {
     cst820::reset(&mut rst, &mut delay).unwrap();
     let mut touch = Cst820::new(i2c);
     let chip_id = touch.chip_id().expect("chip responds after reset");
+
     if chip_id != cst820::CST820_CHIP_ID {
         panic!("unexpected chip ID 0x{chip_id:02X}");
     }
+
     touch
         .configure_interrupts(IrqCtl::new().with_en_change(true).with_en_motion(true))
         .unwrap();
@@ -55,6 +57,7 @@ fn main() -> ! {
             ),
             Err(e) => println!("read failed: {e:?}"),
         }
+
         while int.is_low() {}
     }
 }

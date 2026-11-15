@@ -104,22 +104,26 @@ fn reset_timing() {
     struct Log {
         steps: Vec<String>,
     }
+
     struct Pin<'a>(&'a RefCell<Log>);
     struct Delay<'a>(&'a RefCell<Log>);
 
     impl ErrorType for Pin<'_> {
         type Error = core::convert::Infallible;
     }
+
     impl OutputPin for Pin<'_> {
         fn set_low(&mut self) -> Result<(), Self::Error> {
             self.0.borrow_mut().steps.push("low".into());
             Ok(())
         }
+
         fn set_high(&mut self) -> Result<(), Self::Error> {
             self.0.borrow_mut().steps.push("high".into());
             Ok(())
         }
     }
+
     impl DelayNs for Delay<'_> {
         fn delay_ns(&mut self, ns: u32) {
             self.0.borrow_mut().steps.push(format!("{ns}ns"));
@@ -138,6 +142,7 @@ fn reset_timing() {
             .map(|s| s.trim_end_matches("ns").parse::<u64>().unwrap())
             .sum()
     };
+
     assert_eq!(low, 0);
     assert!(total_ns(&steps[low + 1..high]) >= 100_000);
     assert!(total_ns(&steps[high + 1..]) >= 100_000_000);

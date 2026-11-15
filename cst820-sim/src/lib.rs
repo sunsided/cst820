@@ -105,6 +105,7 @@ impl Cst820Model {
             mode: PowerMode::Dynamic,
             idle_ms: 0,
         };
+
         model.reset();
         model
     }
@@ -115,6 +116,7 @@ impl Cst820Model {
             AutoSleepTime, IrqPulseWidth, LongPressTime, LpAutoWakeTime, LpScanFreq, LpScanTh,
             LpScanWin, NorScanPer,
         };
+
         self.regs = [0; 256];
         self.set(Reg::CHIP_ID, CST820_CHIP_ID);
         self.set(Reg::FW_VERSION, MODEL_FW_VERSION);
@@ -179,19 +181,25 @@ impl Cst820Model {
         if self.mode != PowerMode::Dynamic {
             return false;
         }
+
         if self.expect_pointer {
             self.pointer = byte;
             self.expect_pointer = false;
+
             return true;
         }
+
         let addr = self.pointer;
         self.pointer = self.pointer.wrapping_add(1);
+
         if let Some(&reg) = WRITABLE.iter().find(|r| r.addr() == addr) {
             self.set(reg, byte);
+
             if reg == Reg::SLEEP_MODE && byte == SleepMode::DEEP_SLEEP {
                 self.mode = PowerMode::DeepSleep;
             }
         }
+
         true
     }
 
@@ -209,6 +217,7 @@ impl Cst820Model {
         if self.mode == PowerMode::DeepSleep {
             return false;
         }
+
         self.mode = PowerMode::Dynamic;
         self.idle_ms = 0;
 
@@ -217,6 +226,7 @@ impl Cst820Model {
         } else {
             TouchEvent::Down
         };
+
         let changed = !self.touching || self.position() != (x & 0x0FFF, y & 0x0FFF);
         self.touching = true;
         self.set_point(1, event, x, y);
@@ -230,6 +240,7 @@ impl Cst820Model {
         if !self.touching || self.mode == PowerMode::DeepSleep {
             return false;
         }
+
         self.touching = false;
         self.idle_ms = 0;
         let (x, y) = self.position();
@@ -246,10 +257,13 @@ impl Cst820Model {
         if self.mode == PowerMode::DeepSleep {
             return false;
         }
+
         let mask = MotionMask::from(self.register(Reg::MOTION_MASK));
+
         if gesture == Gesture::DoubleClick && !mask.en_double_click() {
             return false;
         }
+
         self.mode = PowerMode::Dynamic;
         self.idle_ms = 0;
         self.set(Reg::GESTURE_ID, gesture.into_bits());
@@ -261,9 +275,11 @@ impl Cst820Model {
         if self.mode != PowerMode::Dynamic || self.touching {
             return;
         }
+
         self.idle_ms = self.idle_ms.saturating_add(ms);
         let auto_sleep_enabled = self.register(Reg::DIS_AUTO_SLEEP) == 0;
         let timeout_ms = u32::from(self.register(Reg::AUTO_SLEEP_TIME)) * 1000;
+
         if auto_sleep_enabled && self.idle_ms >= timeout_ms {
             self.mode = PowerMode::Standby;
         }
