@@ -8,5 +8,6 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Blocking driver on `embedded-hal` 1.0 and async driver on `embedded-hal-async` 1.0
-  (`async` feature): touch readout, chip identification, interrupt and auto-sleep
+  (`async` feature): touch readout, chip identification, project and firmware
+  version, gesture, interrupt and auto-sleep
   configuration, deep sleep, and hardware reset.

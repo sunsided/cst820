@@ -168,3 +168,32 @@ mod asynch {
         assert!(block_on(driver.identify()).unwrap());
     }
 }
+
+#[test]
+fn reads_versions() {
+    let model = RefCell::new(Cst820Model::new());
+    let mut driver = Cst820::new(FakeI2c::new(&model));
+    assert_eq!(
+        driver.firmware_version().unwrap(),
+        cst820_sim::MODEL_FW_VERSION
+    );
+    assert_eq!(driver.project_id().unwrap(), 0);
+}
+
+#[test]
+fn double_click_requires_motion_mask() {
+    use cst820::registers::MotionMask;
+
+    let model = RefCell::new(Cst820Model::new());
+    let mut driver = Cst820::new(FakeI2c::new(&model));
+    driver
+        .configure_interrupts(IrqCtl::new().with_en_motion(true))
+        .unwrap();
+    assert!(!model.borrow_mut().gesture(Gesture::DoubleClick));
+
+    driver
+        .configure_gestures(MotionMask::new().with_en_double_click(true))
+        .unwrap();
+    assert!(model.borrow_mut().gesture(Gesture::DoubleClick));
+    assert_eq!(driver.read_touch().unwrap().gesture, Gesture::DoubleClick);
+}

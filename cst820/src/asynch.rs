@@ -4,7 +4,9 @@
 
 use crate::{BOOT_DELAY_MS, CST820_CHIP_ID, DEFAULT_DEVICE_ADDRESS, RESET_PULSE_US, Touch};
 use cst820_registers::prelude::*;
-use cst820_registers::{AutoSleepTime, ChipId, DisAutoSleep, IrqCtl, SleepMode};
+use cst820_registers::{
+    AutoSleepTime, ChipId, DisAutoSleep, FwVersion, IrqCtl, MotionMask, ProjId, SleepMode,
+};
 use embedded_hal::digital::OutputPin;
 use embedded_hal_async::delay::DelayNs;
 use embedded_hal_async::i2c::I2c;
@@ -56,6 +58,23 @@ where
     /// Checks whether the chip ID matches [`CST820_CHIP_ID`].
     pub async fn identify(&mut self) -> Result<bool, I2C::Error> {
         Ok(self.chip_id().await? == CST820_CHIP_ID)
+    }
+
+    /// Reads the project ID.
+    pub async fn project_id(&mut self) -> Result<u8, I2C::Error> {
+        Ok(self.read_register::<ProjId>().await?.value())
+    }
+
+    /// Reads the firmware version.
+    pub async fn firmware_version(&mut self) -> Result<u8, I2C::Error> {
+        Ok(self.read_register::<FwVersion>().await?.value())
+    }
+
+    /// Enables gesture actions: continuous scrolling and double click.
+    ///
+    /// Double clicks are only reported when enabled here.
+    pub async fn configure_gestures(&mut self, mask: MotionMask) -> Result<(), I2C::Error> {
+        self.write_register(mask).await
     }
 
     /// Reads the current touch state in a single burst.
