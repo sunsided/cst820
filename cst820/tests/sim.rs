@@ -172,6 +172,89 @@ mod asynch {
         model.borrow_mut().tick(60_000);
         assert!(block_on(driver.identify()).unwrap());
     }
+
+    #[test]
+    fn reads_versions_and_gestures() {
+        use cst820::registers::MotionMask;
+
+        let model = RefCell::new(Cst820Model::new());
+        let mut driver = cst820::asynch::Cst820::with_address(FakeI2c::new(&model), 0x15);
+        assert_eq!(
+            block_on(driver.firmware_version()).unwrap(),
+            cst820_sim::MODEL_FW_VERSION
+        );
+        assert_eq!(block_on(driver.project_id()).unwrap(), 0);
+
+        block_on(driver.configure_interrupts(IrqCtl::new().with_en_motion(true))).unwrap();
+        block_on(driver.configure_gestures(MotionMask::new().with_en_double_click(true))).unwrap();
+        assert!(model.borrow_mut().gesture(Gesture::DoubleClick));
+        assert_eq!(
+            block_on(driver.read_touch()).unwrap().gesture,
+            Gesture::DoubleClick
+        );
+    }
+
+    #[test]
+    fn modifies_registers_and_sleeps() {
+        let model = RefCell::new(Cst820Model::new());
+        let mut driver = cst820::asynch::Cst820::new(FakeI2c::new(&model));
+        block_on(driver.modify_register(|r: IrqCtl| r.with_en_motion(true))).unwrap();
+        assert_eq!(model.borrow().register(Reg::IRQ_CTL), 0x70);
+
+        block_on(driver.set_auto_sleep(Some(5))).unwrap();
+        assert_eq!(
+            block_on(driver.read_register::<AutoSleepTime>())
+                .unwrap()
+                .value(),
+            5
+        );
+
+        block_on(driver.sleep()).unwrap();
+        assert_eq!(model.borrow().power_mode(), PowerMode::DeepSleep);
+
+        let bus = driver.release();
+        model.borrow_mut().reset();
+        assert!(Cst820::new(bus).identify().unwrap());
+    }
+
+    #[test]
+    fn reset_timing() {
+        use embedded_hal::digital::{ErrorType, OutputPin};
+        use embedded_hal_async::delay::DelayNs;
+
+        struct Pin<'a>(&'a RefCell<Vec<u64>>);
+        struct Delay<'a>(&'a RefCell<Vec<u64>>);
+
+        impl ErrorType for Pin<'_> {
+            type Error = core::convert::Infallible;
+        }
+
+        impl OutputPin for Pin<'_> {
+            fn set_low(&mut self) -> Result<(), Self::Error> {
+                self.0.borrow_mut().push(0);
+                Ok(())
+            }
+
+            fn set_high(&mut self) -> Result<(), Self::Error> {
+                self.0.borrow_mut().push(0);
+                Ok(())
+            }
+        }
+
+        impl DelayNs for Delay<'_> {
+            async fn delay_ns(&mut self, ns: u32) {
+                self.0.borrow_mut().push(u64::from(ns));
+            }
+        }
+
+        // Pin changes are logged as 0, delays as their duration in ns.
+        let log = RefCell::new(Vec::new());
+        block_on(cst820::asynch::reset(&mut Pin(&log), &mut Delay(&log))).unwrap();
+        let log = log.into_inner();
+        let mut phases = log.split(|&v| v == 0).skip(1);
+        assert!(phases.next().unwrap().iter().sum::<u64>() >= 100_000);
+        assert!(phases.next().unwrap().iter().sum::<u64>() >= 100_000_000);
+    }
 }
 
 #[test]

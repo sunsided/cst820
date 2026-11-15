@@ -30,6 +30,7 @@ embedded-hal-async = { workspace = true, optional = true }
 [dev-dependencies]
 cst820-sim.workspace = true
 embassy-futures.workspace = true
+embedded-hal-async.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
