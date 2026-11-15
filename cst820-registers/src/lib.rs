@@ -16,14 +16,15 @@
 
 /// Exports commonly used traits.
 pub mod prelude {
-    pub use crate::{Register, WritableRegister};
+    pub use crate::{ReadableRegister, Register, WritableRegister};
     pub use hardware_registers::i2c::*;
     pub use hardware_registers::register_address::RegisterAddress8;
     pub use hardware_registers::sizes::R1;
     pub use hardware_registers::{FromBits, HardwareRegister, ToBits, WritableHardwareRegister};
 }
 
-macro_rules! readable_register {
+/// Implements the address and size information shared by all registers.
+macro_rules! register {
     ($type:ident, $addr:expr) => {
         impl $crate::Register for $type {}
         impl $crate::prelude::HardwareRegister<$crate::prelude::R1> for $type {}
@@ -42,16 +43,12 @@ macro_rules! readable_register {
             const REGISTER_ADDRESS: $crate::prelude::RegisterAddress8 =
                 $crate::prelude::RegisterAddress8::new(($addr).addr());
         }
+    };
+}
 
-        impl $crate::prelude::ToBits for $type {
-            type Target = u8;
-
-            #[inline]
-            fn to_bits(&self) -> Self::Target {
-                (*self).into()
-            }
-        }
-
+/// Implements decoding, which makes a register readable.
+macro_rules! read_access {
+    ($type:ident) => {
         impl $crate::prelude::FromBits<u8> for $type {
             #[inline]
             fn from_bits(value: u8) -> Self {
@@ -63,14 +60,47 @@ macro_rules! readable_register {
                 (*value).into()
             }
         }
+
+        impl $crate::ReadableRegister for $type {}
+    };
+}
+
+/// Implements encoding, which makes a register writable.
+macro_rules! write_access {
+    ($type:ident) => {
+        impl $crate::prelude::ToBits for $type {
+            type Target = u8;
+
+            #[inline]
+            fn to_bits(&self) -> Self::Target {
+                (*self).into()
+            }
+        }
+
+        impl $crate::prelude::WritableHardwareRegister<$crate::prelude::R1> for $type {}
+        impl $crate::WritableRegister for $type {}
+    };
+}
+
+macro_rules! readable_register {
+    ($type:ident, $addr:expr) => {
+        register!($type, $addr);
+        read_access!($type);
     };
 }
 
 macro_rules! writable_register {
     ($type:ident, $addr:expr) => {
-        readable_register!($type, $addr);
-        impl $crate::prelude::WritableHardwareRegister<$crate::prelude::R1> for $type {}
-        impl $crate::WritableRegister for $type {}
+        register!($type, $addr);
+        read_access!($type);
+        write_access!($type);
+    };
+}
+
+macro_rules! write_only_register {
+    ($type:ident, $addr:expr) => {
+        register!($type, $addr);
+        write_access!($type);
     };
 }
 
@@ -90,10 +120,16 @@ pub const DEFAULT_DEVICE_ADDRESS: u8 = 0x15;
 pub const CST820_CHIP_ID: u8 = 0xB7;
 
 /// A controller register.
-pub trait Register: prelude::I2CRegister8<prelude::DeviceAddress7> + From<u8> + Into<u8> {}
+pub trait Register: prelude::I2CRegister8<prelude::DeviceAddress7> {}
+
+/// A readable controller register.
+pub trait ReadableRegister:
+    Register + prelude::ReadableI2CRegister8<prelude::DeviceAddress7> + prelude::FromBits<u8>
+{
+}
 
 /// A writable controller register.
 pub trait WritableRegister:
-    prelude::WritableI2CRegister8<prelude::DeviceAddress7> + Register
+    Register + prelude::WritableI2CRegister8<prelude::DeviceAddress7>
 {
 }
