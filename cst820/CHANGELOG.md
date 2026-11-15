@@ -5,6 +5,10 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-11-15
+
+[0.2.3]: https://github.com/sunsided/cst820/releases/tag/v0.2.3
+
 ### Changed
 
 - Dropped `#![deny(warnings)]`, so a warning added by a newer compiler can no longer
