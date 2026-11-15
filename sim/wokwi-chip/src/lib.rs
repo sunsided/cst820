@@ -33,7 +33,7 @@ thread_local! {
 }
 
 fn with_chip<R>(f: impl FnOnce(&mut Chip) -> R) -> R {
-    CHIP.with(|chip| f(chip.borrow_mut().as_mut().expect("chip_init not called")))
+    CHIP.with(|chip| f(chip.borrow_mut().as_mut().expect("chipInit not called")))
 }
 
 fn cstr(s: &str) -> CString {
@@ -48,7 +48,7 @@ fn debug(message: &str) {
 
 impl Chip {
     fn pulse_int(&mut self) {
-        // SAFETY: Pin and timer IDs were obtained from the simulator in `chip_init`.
+        // SAFETY: Pin and timer IDs were obtained from the simulator in `chipInit`.
         unsafe {
             pinWrite(self.int_pin, LOW);
             timerStart(self.pulse_timer, self.model.irq_pulse_width_us(), false);
@@ -59,7 +59,7 @@ impl Chip {
         if self.in_reset {
             return;
         }
-        // SAFETY: Attribute IDs were obtained from the simulator in `chip_init`.
+        // SAFETY: Attribute IDs were obtained from the simulator in `chipInit`.
         let (x, y, pressed, gesture) = unsafe {
             (
                 attrRead(self.touch_x),
@@ -116,7 +116,7 @@ extern "C" fn on_reset_change(_: *mut c_void, _pin: PinId, value: u32) {
 }
 
 extern "C" fn on_pulse_end(_: *mut c_void) {
-    // SAFETY: The pin ID was obtained from the simulator in `chip_init`.
+    // SAFETY: The pin ID was obtained from the simulator in `chipInit`.
     with_chip(|chip| unsafe { pinWrite(chip.int_pin, HIGH) });
 }
 
@@ -126,7 +126,7 @@ extern "C" fn on_scan(_: *mut c_void) {
 
 /// Entry point called by the simulator.
 #[unsafe(no_mangle)]
-pub extern "C" fn chip_init() {
+pub extern "C" fn chipInit() {
     // SAFETY: All pointers passed to the simulator are valid for the duration of each
     // call; configs are copied by the simulator. Init functions are only called here.
     unsafe {
