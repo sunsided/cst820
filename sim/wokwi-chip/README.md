@@ -17,6 +17,13 @@ binary = '../../sim/wokwi-chip/cst820.chip.wasm'
 
 and add a `chip-cst820` part to `diagram.json`.
 
+Projects outside this repository can use the `chip.zip` attached to each GitHub Release
+instead of building the chip, via `diagram.json` dependencies:
+
+```json
+"dependencies": { "chip-cst820": "github:sunsided/cst820@vX.Y.Z" }
+```
+
 | Pin   | Function                         |
 |-------|----------------------------------|
 | `SDA` | I²C data (address `0x15`)        |
