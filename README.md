@@ -17,6 +17,19 @@ The behavioral model in `cst820-sim` is used both as a fake I²C bus in host tes
 [Wokwi](https://wokwi.com) custom chip (`sim/wokwi-chip`). Example firmware in `examples/`
 runs against the emulated chip using `wokwi-cli`.
 
+## Releasing
+
+Both crates share one version. From `main`, with the changes listed under
+`## [Unreleased]` in each crate's `CHANGELOG.md`:
+
+```sh
+cargo release <patch|minor|major>            # dry run
+cargo release <patch|minor|major> --execute
+```
+
+This publishes `cst820-registers` and `cst820`, commits `Release X.Y.Z`, and pushes the tag
+`vX.Y.Z`. The tag creates a GitHub Release named `X.Y.Z` with the changelog sections as notes.
+
 ## Code of Conduct
 
 We abide by the [Contributor Covenant][cc] and ask that you do as well.

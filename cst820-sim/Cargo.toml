@@ -17,3 +17,6 @@ embedded-hal-async.workspace = true
 
 [dev-dependencies]
 embassy-futures.workspace = true
+
+[package.metadata.release]
+release = false
