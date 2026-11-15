@@ -1,0 +1,19 @@
+[package]
+name = "cst820-sim"
+description = "A behavioral model of the Hynitron CST820 touch controller for tests and emulation"
+publish = false
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+cst820-registers.workspace = true
+embedded-hal.workspace = true
+embedded-hal-async.workspace = true
+
+[dev-dependencies]
+embassy-futures.workspace = true
