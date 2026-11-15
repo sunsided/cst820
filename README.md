@@ -23,6 +23,34 @@ runs against the emulated chip using `wokwi-cli`.
 **[Try it in the browser](https://wokwi.com/projects/480766558097043457)**: an ESP32-C3 talking to the emulated CST820 on
 wokwi.com. Click the chip to drive touches and gestures.
 
+### Use the chip in your own Wokwi project
+
+Every [GitHub Release](https://github.com/sunsided/cst820/releases) carries the chip as
+`chip.zip`. Add a `chip-cst820` part and this dependency to your `diagram.json`, with the
+latest release version written without the tag's `v` (`@v0.2.2` fails to load):
+
+```json
+"dependencies": { "chip-cst820": "github:sunsided/cst820@0.2.2" }
+```
+
+This works on [wokwi.com](https://wokwi.com), in the Wokwi VS Code extension and with
+`wokwi-cli`; nothing needs to be built.
+
+### Run the example locally
+
+Needs [`wokwi-cli`](https://docs.wokwi.com/wokwi-ci/cli-installation) and a
+`WOKWI_CLI_TOKEN` from the [Wokwi CI dashboard](https://wokwi.com/dashboard/ci):
+
+```sh
+sim/wokwi-chip/build.sh
+cd examples/esp32c3
+cargo build --release
+wokwi-cli . --scenario scenarios/touch.yaml --timeout 10000
+```
+
+[`sim/wokwi-chip`](sim/wokwi-chip/README.md) describes building the chip and its pins;
+[`examples/esp32c3`](examples/esp32c3/README.md) the wiring and the scenario.
+
 ## Development
 
 The [Taskfile](Taskfile.dist.yaml) wraps the common commands: `task check` and
