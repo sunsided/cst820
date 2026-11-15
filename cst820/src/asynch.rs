@@ -112,7 +112,7 @@ where
     /// Reads a single register.
     pub async fn read_register<R>(&mut self) -> Result<R, I2C::Error>
     where
-        R: Register,
+        R: ReadableRegister,
     {
         let mut buffer = [0];
         self.i2c
@@ -134,7 +134,7 @@ where
     /// Reads, modifies and writes back a single register.
     pub async fn modify_register<R, F>(&mut self, f: F) -> Result<(), I2C::Error>
     where
-        R: WritableRegister,
+        R: ReadableRegister + WritableRegister,
         F: FnOnce(R) -> R,
     {
         let register = self.read_register::<R>().await?;

@@ -5,6 +5,12 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- [**breaking**] `read_register` requires `ReadableRegister`, and `modify_register`
+  requires a register that is both readable and writable (`cst820-registers` 0.2,
+  `hardware-registers` 0.4).
+
 ## [0.1.0] - 2026-11-15
 
 [0.1.0]: https://github.com/sunsided/cst820/releases/tag/v0.1.0

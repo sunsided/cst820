@@ -240,7 +240,14 @@ value_register!(
     /// via the `RST` pin wakes it up again.
     ///
     /// Not part of the CST816S register declaration; follows vendor drivers.
-    SleepMode, SLEEP_MODE, RW, writable_register
+    ///
+    /// The register is a write-only command:
+    ///
+    /// ```compile_fail
+    /// fn read<R: cst820_registers::ReadableRegister>() {}
+    /// read::<cst820_registers::SleepMode>();
+    /// ```
+    SleepMode, SLEEP_MODE, RW, write_only_register
 );
 
 impl SleepMode {
