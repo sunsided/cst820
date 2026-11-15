@@ -1,0 +1,34 @@
+name: Touch, release and gesture
+version: 1
+author: Markus Mayer
+
+steps:
+  - wait-serial: 'CST820 ok chip_id=0xB7'
+  - set-control:
+      part-id: touch1
+      control: touchX
+      value: 120
+  - set-control:
+      part-id: touch1
+      control: touchY
+      value: 80
+  - set-control:
+      part-id: touch1
+      control: touchPressed
+      value: 1
+  - wait-serial: 'touch x=120 y=80 fingers=1 ev=Down'
+  - set-control:
+      part-id: touch1
+      control: touchX
+      value: 200
+  - wait-serial: 'touch x=200 y=80 fingers=1 ev=Contact'
+  - set-control:
+      part-id: touch1
+      control: touchPressed
+      value: 0
+  - wait-serial: 'touch x=200 y=80 fingers=0 ev=Up'
+  - set-control:
+      part-id: touch1
+      control: gesture
+      value: 3
+  - wait-serial: 'gesture=SlideLeft'
