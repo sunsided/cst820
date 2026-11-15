@@ -1,5 +1,8 @@
 # Hynitron CST820 Touch Controller
 
+[![Build Status](https://github.com/sunsided/cst820/workflows/Rust/badge.svg)](https://github.com/sunsided/cst820/actions)
+[![codecov](https://codecov.io/gh/sunsided/cst820/graph/badge.svg)](https://codecov.io/gh/sunsided/cst820)
+
 > Platform-agnostic Rust support for the Hynitron CST820 self-capacitive touch controller.
 
 | Crate                                    | Description                                              |
