@@ -1,0 +1,25 @@
+[package]
+name = "cst820-registers"
+description = "A typed map of the Hynitron CST820 touch controller registers"
+categories = ["embedded", "hardware-support", "no-std"]
+keywords = ["embedded-hal", "cst820", "touch", "i2c", "registers"]
+readme = "README.md"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+defmt = ["dep:defmt"]
+
+[dependencies]
+bitfield-struct.workspace = true
+defmt = { workspace = true, optional = true }
+hardware-registers.workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
