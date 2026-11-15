@@ -8,6 +8,10 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -18,8 +22,8 @@ jobs:
     # The crates.io trusted publisher is bound to this environment.
     environment: crates-io
     permissions:
-      contents: read
-      id-token: write
+      contents: read # check out the repository
+      id-token: write # exchange the OIDC token for a short-lived crates.io token
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -47,7 +51,7 @@ jobs:
       - publish
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # create the GitHub Release
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

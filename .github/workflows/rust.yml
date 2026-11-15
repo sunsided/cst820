@@ -10,8 +10,13 @@ on:
     branches:
       - main
 
+# Read-only by default; no job needs more.
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -76,33 +81,38 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: [ [ ], [ "--all-features" ], [ "--no-default-features" ] ]
+        features: [ "", "--all-features", "--no-default-features" ]
+    env:
+      FEATURES: ${{ matrix.features }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Build
-        run: cargo build --workspace --verbose ${{ join(matrix.features, ' ') }}
+        run: |
+          # shellcheck disable=SC2086 # FEATURES is empty or a single flag.
+          cargo build --workspace --verbose $FEATURES
       - name: Run doctests
-        run: cargo test --workspace --doc --verbose ${{ join(matrix.features, ' ') }}
+        run: |
+          # shellcheck disable=SC2086 # FEATURES is empty or a single flag.
+          cargo test --workspace --doc --verbose $FEATURES
       - name: Run regular tests
-        run: cargo test --workspace --tests --verbose ${{ join(matrix.features, ' ') }}
+        run: |
+          # shellcheck disable=SC2086 # FEATURES is empty or a single flag.
+          cargo test --workspace --tests --verbose $FEATURES
 
   wokwi:
     name: Wokwi simulation (ESP32-C3)
     needs:
       - build-linux
     runs-on: ubuntu-latest
-    env:
-      WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+    environment: wokwi
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
-        with:
-          targets: wasm32-unknown-unknown, riscv32imc-unknown-none-elf
-          components: clippy, rustfmt
+      - name: Install targets
+        run: rustup target add wasm32-unknown-unknown riscv32imc-unknown-none-elf
       - name: Lint chip and firmware
         run: |
           (cd sim/wokwi-chip && cargo fmt --check && cargo clippy --release -- -D warnings)
@@ -112,8 +122,13 @@ jobs:
       - name: Build firmware
         working-directory: examples/esp32c3
         run: cargo build --release
+      - name: Check for Wokwi token
+        id: token
+        env:
+          WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+        run: echo "present=${WOKWI_CLI_TOKEN:+true}" >> "$GITHUB_OUTPUT"
       - name: Run scenario
-        if: env.WOKWI_CLI_TOKEN != ''
+        if: steps.token.outputs.present == 'true'
         uses: wokwi/wokwi-ci-action@09e807a07e05b6f2498e43e3fb7ffcf38c277af7 # v1.3.0
         with:
           token: ${{ secrets.WOKWI_CLI_TOKEN }}
