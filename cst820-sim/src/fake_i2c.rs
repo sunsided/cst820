@@ -26,23 +26,26 @@ impl<'a> FakeI2c<'a> {
             return Err(ErrorKind::NoAcknowledge(NoAcknowledgeSource::Address));
         }
 
+        // Adjacent operations of the same type form one transfer (no repeated start).
+        let mut previous_is_read = None;
+
         for operation in operations {
+            let is_read = matches!(operation, Operation::Read(_));
+
+            if previous_is_read != Some(is_read) && !model.i2c_start(is_read) {
+                return Err(ErrorKind::NoAcknowledge(NoAcknowledgeSource::Address));
+            }
+
+            previous_is_read = Some(is_read);
+
             match operation {
                 Operation::Write(bytes) => {
-                    if !model.i2c_start(false) {
-                        return Err(ErrorKind::NoAcknowledge(NoAcknowledgeSource::Address));
-                    }
-
                     if !bytes.iter().all(|&b| model.i2c_write(b)) {
                         return Err(ErrorKind::NoAcknowledge(NoAcknowledgeSource::Data));
                     }
                 }
 
                 Operation::Read(buffer) => {
-                    if !model.i2c_start(true) {
-                        return Err(ErrorKind::NoAcknowledge(NoAcknowledgeSource::Address));
-                    }
-
                     buffer.iter_mut().for_each(|b| *b = model.i2c_read());
                 }
             }
@@ -88,6 +91,35 @@ mod tests {
         let mut id = [0];
         bus.write_read(0x15, &[0xA7], &mut id).unwrap();
         assert_eq!(id, [0xB7]);
+    }
+
+    #[test]
+    fn adjacent_writes_form_one_transfer() {
+        let model = RefCell::new(Cst820Model::new());
+        let mut bus = FakeI2c::new(&model);
+        bus.transaction(
+            0x15,
+            &mut [Operation::Write(&[0xF9]), Operation::Write(&[7])],
+        )
+        .unwrap();
+        assert_eq!(model.borrow().register(crate::Reg::AUTO_SLEEP_TIME), 7);
+    }
+
+    #[test]
+    fn adjacent_reads_continue() {
+        let model = RefCell::new(Cst820Model::new());
+        let mut bus = FakeI2c::new(&model);
+        let (mut a, mut b) = ([0], [0]);
+        bus.transaction(
+            0x15,
+            &mut [
+                Operation::Write(&[0xA7]),
+                Operation::Read(&mut a),
+                Operation::Read(&mut b),
+            ],
+        )
+        .unwrap();
+        assert_eq!((a, b), ([0xB7], [0x00]));
     }
 
     #[test]
