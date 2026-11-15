@@ -19,6 +19,29 @@ follows the CST816S register declaration, a member of the same chip family. The 
 event flags in `XposH[7:6]` and the sleep register at `0xE5` are not part of that
 document either; they follow vendor drivers.
 
+## Sources
+
+| Fact | Sources |
+|------|---------|
+| Register map `0x01`–`0x06`, `0xA7`–`0xA9`, `0xB0`–`0xB3`, `0xEC`–`0xFE` | CST816S register declaration (Hynitron) |
+| Chip ID `0xB7` | [LuatOS `luat_tp_cst820.c`][luatos], [Realtek `touch_cst820.c`][realtek], [Zephyr `input_cst8xx.c`][zephyr], [SensorLib][sensorlib], ESPHome |
+| Event bits `XposH[7:6]` (0 down, 1 up, 2 contact, 3 none) | [Zephyr][zephyr], [LuatOS][luatos], [Realtek][realtek] |
+| Touch ID in `YposH[7:4]` | [LuatOS][luatos] |
+| Deep sleep: write `0x03` to `0xE5`, wake only by reset | [Zephyr][zephyr], [SensorLib][sensorlib]; reset wake: CST816S/CST816D datasheets |
+| `IrqCtl` bits | CST816S register declaration, [Zephyr][zephyr]; CST820 modes `0x60`/`0x11`/`0x71`: [Actions SDK][actions] |
+| No I²C response in auto-sleep until touched | [SensorLib author on the CST820][nack] |
+
+No source documents a second touch point or the power-on value of `IrqCtl`; see
+[#1](https://github.com/sunsided/cst820/issues/1) and
+[#3](https://github.com/sunsided/cst820/issues/3).
+
+[luatos]: https://github.com/openLuat/LuatOS/blob/master/components/tp/luat_tp_cst820.c
+[realtek]: https://github.com/realmcu/wearable/blob/main/device/touch/8762D/touch_cst820.c
+[zephyr]: https://github.com/zephyrproject-rtos/zephyr/blob/main/drivers/input/input_cst8xx.c
+[sensorlib]: https://github.com/lewisxhe/SensorLib/tree/master/src/touch
+[actions]: https://github.com/lvgl/lv_port_actions_technology/blob/master/action_technology_sdk/zephyr/drivers/input/tpkey/cst820_tpkey_acts.c
+[nack]: https://github.com/Xinyuan-LilyGO/LilyGo-T-RGB/issues/43#issuecomment-1899513862
+
 See also the [`cst820`](https://crates.io/crates/cst820) driver.
 
 ## License
