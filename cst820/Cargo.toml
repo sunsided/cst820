@@ -4,6 +4,8 @@ description = "A platform-agnostic embedded-hal driver for the Hynitron CST820 t
 categories = ["embedded", "hardware-support", "no-std"]
 keywords = ["embedded-hal-driver", "cst820", "touch", "touchscreen", "i2c"]
 readme = "README.md"
+# The tests need the unpublished cst820-sim crate.
+exclude = ["tests/"]
 version.workspace = true
 authors.workspace = true
 license.workspace = true

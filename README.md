@@ -33,6 +33,13 @@ which publishes `cst820-registers` and `cst820` to crates.io via
 repository) and then creates a GitHub Release named `X.Y.Z` with the changelog sections
 as notes.
 
+Each GitHub Release carries the packaged `.crate` files and the Wokwi chip as `chip.zip`,
+all with [build provenance attestations](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations):
+
+```sh
+gh attestation verify chip.zip -R sunsided/cst820
+```
+
 ## Code of Conduct
 
 We abide by the [Contributor Covenant][cc] and ask that you do as well.
