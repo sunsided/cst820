@@ -17,3 +17,7 @@ wokwi_chip_ll = "0.2.0"
 [profile.release]
 opt-level = "s"
 lto = true
+
+[lints.clippy]
+# Modules live in `name.rs` plus `name/`, never in `name/mod.rs`.
+mod_module_files = "deny"
