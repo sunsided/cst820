@@ -5,6 +5,11 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- With the `defmt` feature, registers print their fields (e.g.
+  `IrqCtl { en_test: false, en_touch: true, … }`) instead of the raw byte.
+
 ## [0.2.1] - 2026-11-15
 
 [0.2.1]: https://github.com/sunsided/cst820/releases/tag/v0.2.1

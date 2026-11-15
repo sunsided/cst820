@@ -101,9 +101,8 @@ macro_rules! value_register {
 
     ($(#[$meta:meta])* $type:ident, $addr:ident, $access:ident, $writable:ident, $default:expr) => {
         $(#[$meta])*
-        #[bitfield(u8, order = Msb)]
+        #[bitfield(u8, order = Msb, defmt = cfg(feature = "defmt"))]
         #[derive(PartialEq, Eq)]
-        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
         pub struct $type {
             /// The register value.
             #[bits(8, access = $access, default = $default)]
@@ -115,9 +114,8 @@ macro_rules! value_register {
 }
 
 /// [`GESTURE_ID`](RegisterAddress::GESTURE_ID) (01h)
-#[bitfield(u8, order = Msb)]
+#[bitfield(u8, order = Msb, defmt = cfg(feature = "defmt"))]
 #[derive(PartialEq, Eq)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct GestureId {
     /// The detected gesture.
     #[bits(8, access = RO)]
@@ -134,9 +132,8 @@ value_register!(
 );
 
 /// [`XPOS_H`](RegisterAddress::XPOS_H) (03h)
-#[bitfield(u8, order = Msb)]
+#[bitfield(u8, order = Msb, defmt = cfg(feature = "defmt"))]
 #[derive(PartialEq, Eq)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct XposH {
     /// The touch event.
     ///
@@ -162,9 +159,8 @@ value_register!(
 );
 
 /// [`YPOS_H`](RegisterAddress::YPOS_H) (05h)
-#[bitfield(u8, order = Msb)]
+#[bitfield(u8, order = Msb, defmt = cfg(feature = "defmt"))]
 #[derive(PartialEq, Eq)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct YposH {
     /// Touch ID bits as reported by vendor drivers; undocumented.
     #[bits(4, access = RO)]
@@ -261,9 +257,8 @@ impl SleepMode {
 }
 
 /// [`MOTION_MASK`](RegisterAddress::MOTION_MASK) (ECh)
-#[bitfield(u8, order = Msb)]
+#[bitfield(u8, order = Msb, defmt = cfg(feature = "defmt"))]
 #[derive(PartialEq, Eq)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct MotionMask {
     #[bits(5)]
     __: u8,
@@ -381,9 +376,8 @@ value_register!(
 );
 
 /// [`IRQ_CTL`](RegisterAddress::IRQ_CTL) (FAh)
-#[bitfield(u8, order = Msb)]
+#[bitfield(u8, order = Msb, defmt = cfg(feature = "defmt"))]
 #[derive(PartialEq, Eq)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct IrqCtl {
     /// Interrupt pin test: periodically generates low pulses.
     #[bits(1, access = RW)]
@@ -428,9 +422,8 @@ value_register!(
 );
 
 /// [`IO_CTL`](RegisterAddress::IO_CTL) (FDh)
-#[bitfield(u8, order = Msb)]
+#[bitfield(u8, order = Msb, defmt = cfg(feature = "defmt"))]
 #[derive(PartialEq, Eq)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct IoCtl {
     #[bits(5)]
     __: u8,
