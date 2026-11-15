@@ -19,7 +19,7 @@ embedded-hal = "1.0.0"
 embedded-hal-async = "1.0.0"
 embassy-futures = "0.1.2"
 fake-bus = "0.1.0"
-hardware-registers = { version = "0.4.0", default-features = false, features = ["i2c"] }
+hardware-registers = { version = "0.4.1", default-features = false, features = ["i2c"] }
 cst820-registers = { version = "0.1.0", path = "cst820-registers" }
 cst820-sim = { path = "cst820-sim" }
 
