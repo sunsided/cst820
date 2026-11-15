@@ -6,7 +6,6 @@
 //! follows the CST816S register declaration, a member of the same chip family.
 
 #![deny(missing_docs)]
-#![deny(warnings)]
 #![no_std]
 #![forbid(unsafe_code)]
 // bitfield-struct generates `with_*_checked` setters that return `Result<_, ()>`.
