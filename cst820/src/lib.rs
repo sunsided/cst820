@@ -22,7 +22,6 @@
 //! [`cst820-registers`]: https://crates.io/crates/cst820-registers
 
 #![deny(missing_docs)]
-#![deny(warnings)]
 #![no_std]
 #![forbid(unsafe_code)]
 // Enables the `doc_cfg` feature when the `docsrs` configuration attribute is defined.
