@@ -5,6 +5,8 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+No changes; released alongside `cst820` 0.2.1, which shares the version.
+
 ## [0.2.0] - 2026-11-15
 
 [0.2.0]: https://github.com/sunsided/cst820/releases/tag/v0.2.0
