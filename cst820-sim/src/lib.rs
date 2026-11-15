@@ -253,8 +253,9 @@ impl Cst820Model {
     /// Reports a gesture. Returns `true` if the chip pulses `INT`.
     ///
     /// A double click is only reported if enabled via [`MotionMask`].
+    /// [`Gesture::Unknown`] is not a gesture the chip reports and is ignored.
     pub fn gesture(&mut self, gesture: Gesture) -> bool {
-        if self.mode == PowerMode::DeepSleep {
+        if self.mode == PowerMode::DeepSleep || gesture == Gesture::Unknown {
             return false;
         }
 
@@ -370,6 +371,9 @@ mod tests {
         assert_eq!(read::<1>(&mut model, 0x01), [0x03]);
 
         assert!(!model.gesture(Gesture::DoubleClick));
+        assert!(!model.gesture(Gesture::Unknown));
+        assert_eq!(read::<1>(&mut model, 0x01), [0x03]);
+
         assert!(write(&mut model, &[0xEC, 0x01]));
         assert!(model.gesture(Gesture::DoubleClick));
     }

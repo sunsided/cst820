@@ -34,8 +34,10 @@ The version is given without the `v` prefix of the release tag; `@v0.1.0` fails 
 | `INT` | Interrupt output, active-low pulses |
 | `RST` | Reset input, active low          |
 
-Controls `touchX`, `touchY` (0–4095), `touchPressed` (0/1) and `gesture` (gesture ID)
-are sampled every 10 ms. Drive them from the Wokwi UI or with `set-control` in
-automation scenarios.
+Controls `touchX`, `touchY` (0–4095), `touchPressed` (0/1) and `gesture` are sampled every
+10 ms. `gesture` selects one of: 0 none, 1 slide up, 2 slide down, 3 slide left, 4 slide
+right, 5 single click, 6 double click (needs `MotionMask`), 7 long press. Each change of
+the control reports one gesture. Drive the controls from the Wokwi UI or with
+`set-control` in automation scenarios.
 
 The chip answers immediately after `RST` rises; the real chip needs at least 100 ms.

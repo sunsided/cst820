@@ -3,7 +3,7 @@
 //! Pins: `VCC`, `GND`, `SDA`, `SCL`, `INT` (active-low pulses), `RST` (active low).
 //!
 //! Controls (also settable as attributes and via `set-control` in scenarios):
-//! `touchX`, `touchY`, `touchPressed` (0/1) and `gesture` (gesture ID, 0 = none).
+//! `touchX`, `touchY`, `touchPressed` (0/1) and `gesture` (an index into [`GESTURES`]).
 //! The controls are sampled every [`SCAN_PERIOD_US`], like the chip's quick-scan period.
 
 use cst820_registers::Gesture;
@@ -11,6 +11,18 @@ use cst820_sim::Cst820Model;
 use std::cell::RefCell;
 use std::ffi::{CString, c_void};
 use wokwi_chip_ll::*;
+
+/// The gestures selectable via the `gesture` control, by index.
+const GESTURES: [Gesture; 8] = [
+    Gesture::None,
+    Gesture::SlideUp,
+    Gesture::SlideDown,
+    Gesture::SlideLeft,
+    Gesture::SlideRight,
+    Gesture::SingleClick,
+    Gesture::DoubleClick,
+    Gesture::LongPress,
+];
 
 /// How often the touch controls are sampled, in microseconds.
 const SCAN_PERIOD_US: u32 = 10_000;
@@ -79,8 +91,12 @@ impl Chip {
 
         self.was_pressed = pressed;
 
-        if gesture != self.last_gesture && gesture != 0 {
-            irq |= self.model.gesture(Gesture::from_bits(gesture as u8));
+        if gesture != self.last_gesture {
+            let selected = GESTURES.get(gesture as usize).copied();
+
+            if let Some(selected) = selected.filter(|&g| g != Gesture::None) {
+                irq |= self.model.gesture(selected);
+            }
         }
 
         self.last_gesture = gesture;
