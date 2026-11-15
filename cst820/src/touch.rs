@@ -44,9 +44,13 @@ impl Touch {
         }
     }
 
-    /// Whether at least one finger is on the panel.
+    /// Whether a finger is on the panel.
+    ///
+    /// Requires a plausible finger count and a down or contact event, so that invalid
+    /// data (e.g. all registers reading `0xFF`) and lift events do not count as touches.
     pub fn pressed(&self) -> bool {
-        self.fingers > 0
+        matches!(self.fingers, 1..=2)
+            && matches!(self.event, TouchEvent::Down | TouchEvent::Contact)
     }
 }
 
@@ -68,5 +72,17 @@ mod tests {
             }
         );
         assert!(touch.pressed());
+    }
+
+    #[test]
+    fn garbage_is_not_a_touch() {
+        // Some CST8xx chips return 0xFF for every register, e.g. right after auto-sleep
+        // is turned off.
+        assert!(!Touch::from_bytes(&[0xFF; Touch::LEN]).pressed());
+    }
+
+    #[test]
+    fn lift_is_not_a_touch() {
+        assert!(!Touch::from_bytes(&[0x00, 0x01, 0x40, 0x10, 0x00, 0x10]).pressed());
     }
 }
