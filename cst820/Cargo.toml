@@ -12,6 +12,9 @@ repository.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 
+[lints]
+workspace = true
+
 [features]
 async = ["dep:embedded-hal-async"]
 defmt = ["dep:defmt", "cst820-registers/defmt"]

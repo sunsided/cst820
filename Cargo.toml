@@ -21,3 +21,7 @@ embassy-futures = "0.1.2"
 hardware-registers = "0.2.0"
 cst820-registers = { version = "0.1.0", path = "cst820-registers" }
 cst820-sim = { path = "cst820-sim" }
+
+[workspace.lints.clippy]
+# Modules live in `name.rs` plus `name/`, never in `name/mod.rs`.
+mod_module_files = "deny"
