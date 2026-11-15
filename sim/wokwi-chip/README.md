@@ -17,12 +17,15 @@ binary = '../../sim/wokwi-chip/cst820.chip.wasm'
 
 and add a `chip-cst820` part to `diagram.json`.
 
-Projects outside this repository can use the `chip.zip` attached to each GitHub Release
-instead of building the chip, via `diagram.json` dependencies:
+Projects outside this repository (on wokwi.com, in VS Code or with `wokwi-cli`) can use
+the `chip.zip` attached to each GitHub Release instead of building the chip. Add a
+`chip-cst820` part and a dependency to `diagram.json`; no `[[chip]]` entry is needed:
 
 ```json
-"dependencies": { "chip-cst820": "github:sunsided/cst820@vX.Y.Z" }
+"dependencies": { "chip-cst820": "github:sunsided/cst820@0.1.0" }
 ```
+
+The version is given without the `v` prefix of the release tag; `@v0.1.0` fails to load.
 
 | Pin   | Function                         |
 |-------|----------------------------------|
